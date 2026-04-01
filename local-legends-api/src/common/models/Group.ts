@@ -2,18 +2,18 @@ import Message from "./Messages";
 import Profile from "./Profile";
 
 export default class Group {
-    id: number;
+    id: string;
     name: string;
-    gameId: number;
+    gameId: string;
     status: GroupStatus;
     systemMessageId: number;
     lastMessageId: number;
     createdAt: Date;
 
     constructor(
-        id: number, 
+        id: string, 
         name: string, 
-        gameId: number, 
+        gameId: string, 
         status: GroupStatus, 
         systemMessageId: number, 
         lastMessageId: number, 

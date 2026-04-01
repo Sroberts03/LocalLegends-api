@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { GetGamesReq, GetGamesRes } from './game.types';
+import { GetGamesReq, GetGamesRes, GetSportsRes } from './game.types';
 import { GameDAO } from './game.dao';
 
 @Injectable()
@@ -9,5 +9,10 @@ export class GameService {
   async listGames(req: GetGamesReq, userId: string): Promise<GetGamesRes> {
     const games = await this.gameDAO.getGames(req, userId);
     return { games };
+  }
+
+  async listSports(): Promise<GetSportsRes> {
+    const sports = await this.gameDAO.getSports();
+    return { sports };
   }
 }

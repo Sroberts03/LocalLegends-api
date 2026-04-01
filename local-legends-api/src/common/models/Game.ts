@@ -2,9 +2,9 @@ import Profile from "./Profile";
 
 export default class Game {
     id: number;
-    sportId: number;
+    sportId: string;
     creatorId: string;
-    locationId: number;
+    locationId: string;
     name: string;
     description: string;
     maxPlayers: number;
@@ -22,9 +22,9 @@ export default class Game {
 
     constructor(
         id: number, 
-        sportId: number, 
+        sportId: string, 
         creatorId: string, 
-        locationId: number, 
+        locationId: string, 
         name: string, 
         description: string, 
         maxPlayers: number, 
@@ -62,61 +62,53 @@ export default class Game {
 }
 
 export class GameCreation {
-    id?: number;
-    sportId?: number;
-    googlePlaceId?: string;
-    gameName?: string;
-    gameDescription?: string;
-    streetAddress?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    country?: string;
-    latitude?: number;
-    longitude?: number;
-    locationName?: string;
-    locationDescription?: string;
-    maxPlayers?: number;
-    minPlayers?: number;
-    startTime?: Date;
-    endTime?: Date;
-    status: GameStatus;
-    isRecurring?: boolean;
-    skillLevel?: SkillLevel;
-    genderPreference?: GenderPreference;
-    accessType?: AccessType;
-    createdAt?: Date;
-    updatedAt?: Date;
+    sportId: string;
+    googlePlaceId: string;
+    gameName: string;
+    gameDescription: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+    latitude: number;
+    longitude: number;
+    locationName: string;
+    locationDescription: string;
+    maxPlayers: number;
+    minPlayers: number;
+    startTime: Date;
+    endTime: Date;
+    isRecurring: boolean;
+    skillLevel: SkillLevel;
+    genderPreference: GenderPreference;
+    accessType: AccessType;
 
     constructor(
-        status: GameStatus,
-        id?: number,
-        sportId?: number, 
-        googlePlaceId?: string, 
-        gameName?: string, 
-        gameDescription?: string, 
-        streetAddress?: string, 
-        city?: string, 
-        state?: string, 
-        zipCode?: string, 
-        country?: string, 
-        latitude?: number, 
-        longitude?: number, 
-        locationName?: string, 
-        locationDescription?: string, 
-        maxPlayers?: number, 
-        minPlayers?: number, 
-        startTime?: Date, 
-        endTime?: Date,  
-        isRecurring?: boolean,
-        skillLevel?: SkillLevel,
-        genderPreference?: GenderPreference,
-        accessType?: AccessType,
-        createdAt?: Date,
-        updatedAt?: Date
+        sportId: string, 
+        googlePlaceId: string, 
+        gameName: string, 
+        gameDescription: string, 
+        streetAddress: string, 
+        city: string, 
+        state: string, 
+        zipCode: string, 
+        country: string, 
+        latitude: number, 
+        longitude: number, 
+        locationName: string, 
+        locationDescription: string, 
+        maxPlayers: number, 
+        minPlayers: number, 
+        startTime: Date, 
+        endTime: Date,  
+        isRecurring: boolean,
+        skillLevel: SkillLevel,
+        genderPreference: GenderPreference,
+        accessType: AccessType,
+        createdAt: Date,
+        updatedAt: Date
     ) {
-        this.id = id;
-        this.status = status;
         this.sportId = sportId;
         this.googlePlaceId = googlePlaceId;
         this.gameName = gameName;
@@ -138,8 +130,6 @@ export class GameCreation {
         this.skillLevel = skillLevel;
         this.genderPreference = genderPreference;
         this.accessType = accessType;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 }
 
@@ -171,7 +161,7 @@ export enum GenderPreference {
 }
 
 export interface GameFilter {
-    sportIds?: number[];
+    sportIds?: string[];
     skillLevels?: SkillLevel[];
     genderPreferences?: GenderPreference[];
     // distance and location-based filters
@@ -195,7 +185,7 @@ export interface GameWithDetails {
 }
 
 export interface SearchedGame {
-    id: number;
+    id: string;
     name: string;
     sportName: string;
     locationName: string;

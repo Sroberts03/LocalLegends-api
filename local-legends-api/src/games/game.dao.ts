@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { SupabaseService } from "src/supabase/supabase.service";
 import { GameFilter, GameWithDetails } from "src/common/models/Game";
 import { DAOUtils } from "src/games/game.dao.utils";
+import Sport from "src/common/models/Sport";
 
 @Injectable()
 export class GameDAO {
@@ -101,5 +102,11 @@ export class GameDAO {
         }
 
         return query;
+    }
+
+    async getSports(): Promise<Sport[]> {
+        const { data, error } = await this.supabase.client.from('sports').select('*');
+        if (error) throw error;
+        return data as Sport[];
     }
 }

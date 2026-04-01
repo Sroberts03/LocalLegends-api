@@ -1,5 +1,5 @@
 export default class Location {
-    id: number;
+    id: string;
     googlePlaceId: string;
     name: string;
     description?: string;
@@ -12,7 +12,7 @@ export default class Location {
     longitude: number;
 
     constructor(
-        id: number, 
+        id: string, 
         googlePlaceId: string, 
         name: string, 
         streetAddress: string, 

@@ -1,12 +1,17 @@
 export default class Sport {
-    id: number;
+    id: string;
     name: string;
     category: SportCategory;
     slug: string;
     imageUrl: string;
     status: string;
 
-    constructor(id: number, name: string, category: SportCategory, slug: string, imageUrl: string, status: string) {
+    constructor(id: string, 
+        name: string, 
+        category: SportCategory, 
+        slug: string, 
+        imageUrl: string, 
+        status: string) {
         this.id = id;
         this.name = name;
         this.category = category;
