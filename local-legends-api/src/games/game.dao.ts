@@ -1,8 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { SupabaseService } from "src/supabase/supabase.service";
-import { GameFilter, GameWithDetails } from "src/common/models/Game";
+import Game, { GameFilter, GameStatus, GameWithDetails } from "src/common/models/Game";
 import { DAOUtils } from "src/games/game.dao.utils";
 import Sport from "src/common/models/Sport";
+import { CreateGameReq } from "./game.types";
+import Location from "src/common/models/Location";
 
 @Injectable()
 export class GameDAO {
@@ -108,5 +110,87 @@ export class GameDAO {
         const { data, error } = await this.supabase.client.from('sports').select('*');
         if (error) throw error;
         return data as Sport[];
+    }
+
+    async createGame(req: CreateGameReq, userId: string): Promise<Game> {
+        const { data: existingLocation, error: locationError } = 
+            await this.supabase.client.from('locations')
+            .select('id').eq('google_place_id', req.googlePlaceId)
+            .maybeSingle();
+        
+        if (locationError) throw locationError;
+        
+        let locationId = existingLocation?.id;
+
+        if (!locationId) {
+            const newLocation = await this.createNewLocation(
+                req.googlePlaceId,
+                req.locationName,
+                req.locationDescription,
+                req.streetAddress,
+                req.city,
+                req.state,
+                req.zipCode,
+                req.latitude,
+                req.longitude
+            );
+            locationId = newLocation?.id;
+        }
+            
+        const { data, error } = await this.supabase.client.from('games').insert({
+            sport_id: req.sportId,
+            creator_id: userId,
+            location_id: locationId,
+            name: req.gameName,
+            description: req.gameDescription,
+            max_players: req.maxPlayers,
+            min_players: req.minPlayers,
+            status: GameStatus.Active,
+            start_time: req.startTime,
+            end_time: req.endTime,
+            is_recurring: req.isRecurring,
+            skill_level: req.skillLevel,
+            gender_preference: req.genderPreference,
+            access_type: req.accessType,
+        }).select().single();
+        if (error) throw error;
+
+        await this.addUserToGame(userId, data.id);
+
+        return data as unknown as Game;
+    }
+
+    async createNewLocation(
+        googlePlaceId: string, 
+        locationName: string, 
+        locationDescription: string, 
+        streetAddress: string, 
+        city: string, 
+        state: string, 
+        zipCode: string, 
+        latitude: number, 
+        longitude: number): Promise<Location | null> {
+        const { data, error } = await this.supabase.client.from('locations').insert({
+            google_place_id: googlePlaceId,
+            name: locationName,
+            description: locationDescription,
+            street_address: streetAddress,
+            city: city,
+            state: state,
+            zip: zipCode,
+            latitude: latitude,
+            longitude: longitude,
+        }).select().maybeSingle();
+        
+        if (error) throw error;
+        return data as Location;
+    }
+    
+    async addUserToGame(userId: string, gameId: string): Promise<void> {
+        const { error } = await this.supabase.client.from('user_games').insert({
+            user_id: userId,
+            game_id: gameId,
+        });
+        if (error) throw error;
     }
 }

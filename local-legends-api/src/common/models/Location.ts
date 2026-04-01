@@ -6,8 +6,7 @@ export default class Location {
     streetAddress: string;
     city: string;
     state: string;
-    zipCode: string;
-    country: string;
+    zip: string;
     latitude: number;
     longitude: number;
 
@@ -18,8 +17,7 @@ export default class Location {
         streetAddress: string, 
         city: string, 
         state: string,
-        zipCode: string,
-        country: string,
+        zip: string,
         latitude: number,
         longitude: number,
         description?: string
@@ -30,8 +28,7 @@ export default class Location {
         this.streetAddress = streetAddress;
         this.city = city;
         this.state = state;
-        this.zipCode = zipCode;
-        this.country = country;
+        this.zip = zip;
         this.latitude = latitude;
         this.longitude = longitude;
         this.description = description;

@@ -1,7 +1,7 @@
-import { Body, Controller, Get, UseGuards, Request, Query } from '@nestjs/common';
+import { Body, Controller, Get, UseGuards, Request, Query, Post } from '@nestjs/common';
 import { GameService } from './game.service';
 import { AuthGuard } from '../common/auth.guard';
-import type { GetGamesReq, GetGamesRes, GetSportsRes } from './game.types';
+import type { CreateGameReq, CreateGameRes, GetGamesReq, GetGamesRes, GetSportsRes } from './game.types';
 
 @Controller('games')
 export class GameController {
@@ -17,5 +17,11 @@ export class GameController {
   @UseGuards(AuthGuard)
   async listSports(): Promise<GetSportsRes> {
     return await this.gameService.listSports();
+  }
+
+  @Post('create-game')
+  @UseGuards(AuthGuard)
+  async createGame(@Request() req: any, @Body() body: CreateGameReq): Promise<CreateGameRes> {
+    return await this.gameService.createGame(body, req.user.id);
   }
 }
