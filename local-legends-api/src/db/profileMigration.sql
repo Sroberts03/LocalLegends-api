@@ -1,7 +1,16 @@
+do $$ begin
+    create type public.profile_status as enum ('Good Standing', 'Warning', 'Suspended', 'Banned');
+exception
+    when duplicate_object then null;
+end $$;
+
 create table if not exists public.profiles (
     id uuid references auth.users on delete cascade not null primary key,
     display_name text,
     profile_url text,
+    bio text,
+    status profile_status default 'Good Standing'::profile_status,
+    reliability_score int default 0,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

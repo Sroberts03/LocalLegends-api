@@ -44,13 +44,14 @@ export class GameDAO {
     }
 
     private prepareBaseQuery(filter: GameFilter) {
-        const hasLocationFilter = filter.latitude && filter.longitude && filter.maxDistance;
+        const { latitude, longitude, maxDistance } = filter;
+        const hasLocationFilter = latitude !== undefined && longitude !== undefined && maxDistance !== undefined;
 
         if (hasLocationFilter) {
             return this.supabase.client.rpc('get_nearby_games', {
-                lat: filter.latitude,
-                lng: filter.longitude,
-                max_dist_meters: filter.maxDistance * 1609.34,
+                lat: Number(latitude),
+                lng: Number(longitude),
+                max_dist_meters: Number(maxDistance) * 1609.34,
             });
         }
 
@@ -58,6 +59,9 @@ export class GameDAO {
     }
 
     private applyFilters(query: any, filter: GameFilter, userId: string, joinedIds: string[], favIds: number[]) {
+        const favoritesOnly = String(filter.favoritesOnly) === 'true';
+        const happeningTodayOnly = String(filter.happeningTodayOnly) === 'true';
+
         query = query
             .eq('status', 'active')
             .eq('access_type', 'public')
@@ -69,24 +73,27 @@ export class GameDAO {
             query = query.nin('id', joinedIds);
         }
 
-        if (filter.favoritesOnly) {
+        if (favoritesOnly) {
             query = query.in('sport_id', favIds);
         }
 
         // Optional request filters
         if (filter.sportIds?.length) {
-            query = query.in('sport_id', filter.sportIds);
+            const ids = Array.isArray(filter.sportIds) ? filter.sportIds : [filter.sportIds];
+            query = query.in('sport_id', ids.map(id => Number(id)));
         }
 
         if (filter.skillLevels?.length) {
-            query = query.in('skill_level', filter.skillLevels);
+            const levels = Array.isArray(filter.skillLevels) ? filter.skillLevels : [filter.skillLevels];
+            query = query.in('skill_level', levels);
         }
 
         if (filter.genderPreferences?.length) {
-            query = query.in('gender_preference', filter.genderPreferences);
+            const preferences = Array.isArray(filter.genderPreferences) ? filter.genderPreferences : [filter.genderPreferences];
+            query = query.in('gender_preference', preferences);
         }
 
-        if (filter.happeningTodayOnly) {
+        if (happeningTodayOnly) {
             const today = new Date();
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);

@@ -170,8 +170,9 @@ SELECT
         'id', pr.id,
         'displayName', pr.display_name,
         'bio', pr.bio,
-        'profileImageUrl', pr.profile_image_url,
+        'profileImageUrl', pr.profile_url,
         'status', pr.status,
+        'reliabilityScore', pr.reliability_score,
         'createdAt', pr.created_at
     )), '[]')
      FROM user_games ug
@@ -182,3 +183,24 @@ FROM games g
 JOIN sports s ON g.sport_id = s.id
 JOIN locations l ON g.location_id = l.id
 JOIN profiles p ON g.creator_id = p.id;
+
+-- 6. Geospatial Filtering Function
+CREATE OR REPLACE FUNCTION public.get_nearby_games(
+    lat float8,
+    lng float8,
+    max_dist_meters float8
+)
+RETURNS SETOF public.games_with_details
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+    SELECT *
+    FROM public.games_with_details
+    WHERE ST_DWithin(
+        ST_SetSRID(ST_MakePoint(location_longitude, location_latitude), 4326)::geography,
+        ST_SetSRID(ST_MakePoint(lng, lat), 4326)::geography,
+        max_dist_meters
+    );
+$$;
+
