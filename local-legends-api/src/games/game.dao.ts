@@ -13,6 +13,7 @@ export class GameDAO {
     async getGames(filter: GameFilter, userId: string): Promise<GameWithDetails[]> {
         // 1. Fetch auxiliary data
         const { favIds, joinedIds } = await this.fetchUserContext(userId);
+        console.log(filter);
 
         // 2. Early return for "Favorites Only" if no favorites exist
         if (filter.favoritesOnly === true && favIds.length === 0) {
@@ -25,6 +26,7 @@ export class GameDAO {
 
         const { data, error } = await query;
         if (error) throw error;
+        console.log(data);
 
         // 4. Map results using DAOUtils
         return (data as any[]).map(row => DAOUtils.mapRowToGameWithDetails(row, userId));
@@ -46,9 +48,13 @@ export class GameDAO {
         };
     }
 
+    private isValDefined(val: any): boolean {
+        return val !== undefined && val !== null && String(val) !== 'undefined' && String(val).trim() !== '';
+    }
+
     private prepareBaseQuery(filter: GameFilter) {
         const { latitude, longitude, maxDistance } = filter;
-        const hasLocationFilter = latitude !== undefined && longitude !== undefined && maxDistance !== undefined;
+        const hasLocationFilter = this.isValDefined(latitude) && this.isValDefined(longitude) && this.isValDefined(maxDistance);
 
         if (hasLocationFilter) {
             return this.supabase.client.rpc('get_nearby_games', {
@@ -80,29 +86,38 @@ export class GameDAO {
             query = query.in('sport_id', favIds);
         }
 
-        // Helper to check if a value is effectively "empty" or the string "undefined"
-        const isDefined = (val: any) => 
-            val !== undefined && val !== null && String(val) !== 'undefined' && String(val).trim() !== '';
-
-        // Helper to ensure we have a clean array of values, even if they arrive as comma-separated strings
-        const ensureArray = (val: any): string[] => {
-            if (!isDefined(val)) return [];
-            if (Array.isArray(val)) return val.filter(isDefined);
-            return String(val).split(',').map(v => v.trim()).filter(isDefined);
+        // Helper to ensure we have a clean array of values, even if they arrive as comma-separated strings or via [] suffix
+        const getFilterArray = (primaryKey: string): string[] => {
+            const arrayKey = `${primaryKey}[]`;
+            const val = filter[primaryKey] || (filter as any)[arrayKey];
+            
+            if (!this.isValDefined(val)) return [];
+            
+            // Normalize to array, potentially decoding URL segments
+            const rawArray = Array.isArray(val) 
+                ? val 
+                : String(val).split(',').map(v => v.trim());
+            
+            return rawArray
+                .map(v => decodeURIComponent(v))
+                .filter(v => this.isValDefined(v));
         };
 
         // Optional request filters
-        const sportIds = ensureArray(filter.sportIds);
+        const sportIds = getFilterArray('sportIds');
+        const skillLevels = getFilterArray('skillLevels');
+        const genderPreferences = getFilterArray('genderPreferences');
+
+        console.log('Applied Filters:', { sportIds, skillLevels, genderPreferences });
+
         if (sportIds.length > 0) {
             query = query.in('sport_id', sportIds);
         }
 
-        const skillLevels = ensureArray(filter.skillLevels);
         if (skillLevels.length > 0) {
             query = query.in('skill_level', skillLevels);
         }
 
-        const genderPreferences = ensureArray(filter.genderPreferences);
         if (genderPreferences.length > 0) {
             query = query.in('gender_preference', genderPreferences);
         }
