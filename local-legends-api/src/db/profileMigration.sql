@@ -40,3 +40,43 @@ create policy "Public profiles are viewable by everyone."
 create policy "Users can update own profile." 
   on public.profiles for update 
   using ( auth.uid() = id );
+
+-- view
+CREATE OR REPLACE VIEW profile_with_stats 
+WITH (security_invoker = true)
+AS
+SELECT 
+    p.id,
+    p.display_name as "displayName",
+    p.bio,
+    p.status,
+    p.profile_url as "profileImageUrl",
+    p.reliability_score as "reliabilityScore",
+    EXTRACT(YEAR FROM p.created_at)::int as "yearJoined",
+    -- Favorite Sports
+    (SELECT COALESCE(JSON_AGG(json_build_object(
+        'id', s.id,
+        'name', s.name,
+        'category', s.category,
+        'slug', s.slug,
+        'iconUrl', s.icon_url,
+        'status', s.status,
+        'createdAt', s.created_at
+    )), '[]')
+     FROM user_favorite_sports ufs
+     JOIN sports s ON ufs.sport_id = s.id
+     WHERE ufs.user_id = p.id) as "favoriteSports",
+    -- Last 5 Games
+    (SELECT COALESCE(JSON_AGG(gwd.*), '[]')
+     FROM (
+         SELECT g.*
+         FROM user_games ug
+         JOIN games_with_details g ON ug.game_id = g.id
+         WHERE ug.user_id = p.id
+         ORDER BY g.start_time DESC
+         LIMIT 5
+     ) gwd) as "last5Games",
+    -- Stats
+    (SELECT COUNT(*) FROM games WHERE creator_id = p.id)::int as "totalGamesHosted",
+    (SELECT COUNT(*) FROM user_games WHERE user_id = p.id)::int as "totalGamesJoined"
+FROM profiles p;
