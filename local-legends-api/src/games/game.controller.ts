@@ -24,4 +24,10 @@ export class GameController {
   async createGame(@Request() req: any, @Body() body: CreateGameReq): Promise<CreateGameRes> {
     return await this.gameService.createGame(body, req.user.id);
   }
+
+  @Get('my-games')
+  @UseGuards(AuthGuard)
+  async getMyGames(@Request() req: any): Promise<GetGamesRes> {
+    return await this.gameService.getMyGames(req.user.id);
+  }
 }

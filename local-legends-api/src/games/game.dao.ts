@@ -207,4 +207,13 @@ export class GameDAO {
         });
         if (error) throw error;
     }
+
+    async getMyGames(userId: string): Promise<GameWithDetails[]> {
+        const { data, error } = await this.supabase.client
+            .from('games_with_details')
+            .select('*')
+            .eq('creator_id', userId);
+        if (error) throw error;
+        return (data as any[]).map(row => DAOUtils.mapRowToGameWithDetails(row, userId));
+    }
 }

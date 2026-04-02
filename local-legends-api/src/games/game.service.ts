@@ -24,4 +24,9 @@ export class GameService {
       throw new Error('An unknown error occurred while creating the game. Please try again later.');
     }
   }
+
+  async getMyGames(userId: string): Promise<GetGamesRes> {
+    const games = await this.gameDAO.getMyGames(userId);
+    return { games };
+  }
 }
