@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGameReq, CreateGameRes, GetGamesReq, GetGamesRes, GetSportsRes } from './game.types';
+import { CreateGameReq, CreateGameRes, GetGamesReq, GetGamesRes, GetSportsRes, JoinGameRes } from './game.types';
 import { GameDAO } from './game.dao';
 
 @Injectable()
@@ -28,5 +28,23 @@ export class GameService {
   async getMyGames(userId: string): Promise<GetGamesRes> {
     const games = await this.gameDAO.getMyGames(userId);
     return { games };
+  }
+
+  async joinGame(gameId: string, userId: string): Promise<JoinGameRes> {
+    try {
+      await this.gameDAO.joinGame(gameId, userId);
+      return { success: true, message: 'Successfully joined the game.' };
+    } catch (error) {
+      throw new Error('An unknown error occurred while joining the game. Please try again later.');
+    }
+  }
+
+  async leaveGame(gameId: string, userId: string): Promise<JoinGameRes> {
+    try {
+      await this.gameDAO.leaveGame(gameId, userId);
+      return { success: true, message: 'Successfully left the game.' };
+    } catch (error) {
+      throw new Error('An unknown error occurred while leaving the game. Please try again later.');
+    }
   }
 }

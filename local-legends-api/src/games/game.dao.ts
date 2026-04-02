@@ -211,9 +211,26 @@ export class GameDAO {
     async getMyGames(userId: string): Promise<GameWithDetails[]> {
         const { data, error } = await this.supabase.client
             .from('games_with_details')
-            .select('*')
-            .eq('creator_id', userId);
+            .select('*, user_games!inner(user_id)')
+            .eq('user_games.user_id', userId);
+            
         if (error) throw error;
+        
         return (data as any[]).map(row => DAOUtils.mapRowToGameWithDetails(row, userId));
+    }
+
+    async joinGame(gameId: string, userId: string): Promise<void> {
+        const { error } = await this.supabase.client.from('user_games').insert({
+            user_id: userId,
+            game_id: gameId,
+        });
+        if (error) throw error;
+    }
+
+    async leaveGame(gameId: string, userId: string): Promise<void> {
+        const { error } = await this.supabase.client.from('user_games').delete()
+            .eq('user_id', userId)
+            .eq('game_id', gameId);
+        if (error) throw error;
     }
 }
