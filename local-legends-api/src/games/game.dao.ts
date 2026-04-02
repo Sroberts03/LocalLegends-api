@@ -61,7 +61,7 @@ export class GameDAO {
         return this.supabase.client.from('games_with_details').select('*');
     }
 
-    private applyFilters(query: any, filter: GameFilter, userId: string, joinedIds: string[], favIds: number[]) {
+    private applyFilters(query: any, filter: GameFilter, userId: string, joinedIds: string[], favIds: string[]) {
         const favoritesOnly = String(filter.favoritesOnly) === 'true';
         const happeningTodayOnly = String(filter.happeningTodayOnly) === 'true';
 
@@ -73,7 +73,7 @@ export class GameDAO {
 
         // Exclusion/Inclusion logic
         if (joinedIds.length > 0) {
-            query = query.nin('id', joinedIds);
+            query = query.not('id', 'in', `(${joinedIds.join(',')})`);
         }
 
         if (favoritesOnly) {
@@ -83,7 +83,7 @@ export class GameDAO {
         // Optional request filters
         if (filter.sportIds?.length) {
             const ids = Array.isArray(filter.sportIds) ? filter.sportIds : [filter.sportIds];
-            query = query.in('sport_id', ids.map(id => Number(id)));
+            query = query.in('sport_id', ids);
         }
 
         if (filter.skillLevels?.length) {
