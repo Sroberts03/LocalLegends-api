@@ -22,3 +22,12 @@ export interface EditProfileResponse extends Profile {
     totalGamesHosted: number;
     totalGamesJoined: number;
 }
+
+export interface EditFavoriteSportsRequest {
+    favoriteSportIds: string[];
+}
+
+export interface EditFavoriteSportsResponse {
+    success: boolean;
+    message: string;
+}

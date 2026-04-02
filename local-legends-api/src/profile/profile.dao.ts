@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { SupabaseService } from "src/supabase/supabase.service";
 import { DAOUtils } from "src/games/game.dao.utils";
-import { EditProfileRequest, EditProfileResponse, GetProfileResponse } from './profile.types';
+import { EditFavoriteSportsRequest, EditFavoriteSportsResponse, EditProfileRequest, EditProfileResponse, GetProfileResponse } from './profile.types';
 
 @Injectable()
 export class ProfileDAO {
@@ -36,5 +36,26 @@ export class ProfileDAO {
 
         // Return the full updated profile using our efficient view-based method
         return await this.getMyProfile(userId);
+    }
+
+    async editFavoriteSports(
+        userId: string,
+        body: EditFavoriteSportsRequest
+    ): Promise<void> {
+        const { error } = await this.supabase.client.from('user_favorite_sports')
+            .delete()
+            .eq('user_id', userId);
+        
+        if (error) throw error;
+
+        const { error: insertError } = await this.supabase.client.from('user_favorite_sports')
+            .insert(
+                body.favoriteSportIds.map(id => ({
+                    user_id: userId,
+                    sport_id: id
+                }))
+            );
+        
+        if (insertError) throw insertError;
     }
 }
