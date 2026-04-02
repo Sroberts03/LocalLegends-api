@@ -9,3 +9,16 @@ export interface GetProfileResponse extends Profile {
     totalGamesHosted: number;
     totalGamesJoined: number;
 }
+
+export interface EditProfileRequest {
+    displayName?: string;
+    bio?: string;
+    profilePicture?: string;
+}
+
+export interface EditProfileResponse extends Profile { 
+    favoriteSports: Sport[];
+    last5Games: GameWithDetails[];
+    totalGamesHosted: number;
+    totalGamesJoined: number;
+}

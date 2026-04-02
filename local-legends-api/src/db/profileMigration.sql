@@ -24,10 +24,31 @@ begin
 end;
 $$ language plpgsql security definer;
 
+create or replace function public.handle_profile_update()
+returns trigger as $$
+begin
+  update auth.users
+  set raw_user_meta_data = coalesce(raw_user_meta_data, '{}'::jsonb) || 
+    jsonb_build_object(
+      'display_name', new.display_name,
+      'profile_url', new.profile_url
+    )
+  where id = new.id;
+  return new;
+end;
+$$ language plpgsql security definer;
+
 -- Trigger to link auth.users to public.profiles
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+drop trigger if exists on_profile_updated on public.profiles;
+create trigger on_profile_updated
+  after update on public.profiles
+  for each row
+  when (old.display_name is distinct from new.display_name or old.profile_url is distinct from new.profile_url)
+  execute procedure public.handle_profile_update();
 
 -- Enable RLS
 alter table public.profiles enable row level security;

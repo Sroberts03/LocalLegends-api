@@ -1,7 +1,7 @@
-import { Body, Controller, Get, UseGuards, Request, Query, Post, Delete } from '@nestjs/common';
+import { Body, Controller, Get, UseGuards, Request, Query, Post, Delete, Put } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { AuthGuard } from '../common/auth.guard';
-import type { GetProfileResponse } from './profile.types';
+import type { EditProfileRequest, EditProfileResponse, GetProfileResponse } from './profile.types';
 
 @Controller('profile')
 export class ProfileController {
@@ -11,5 +11,11 @@ export class ProfileController {
   @UseGuards(AuthGuard)
   async getMyProfile(@Request() req: any): Promise<GetProfileResponse> {
     return await this.profileService.getMyProfile(req.user.id);
+  }
+
+  @Put('my-profile')
+  @UseGuards(AuthGuard)
+  async editMyProfile(@Request() req: any, @Body() body: EditProfileRequest): Promise<EditProfileResponse> {
+    return await this.profileService.editMyProfile(req.user.id, body);
   }
 }

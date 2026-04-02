@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { SupabaseService } from "src/supabase/supabase.service";
 import { DAOUtils } from "src/games/game.dao.utils";
-import { GetProfileResponse } from './profile.types';
+import { EditProfileRequest, EditProfileResponse, GetProfileResponse } from './profile.types';
 
 @Injectable()
 export class ProfileDAO {
@@ -20,5 +20,21 @@ export class ProfileDAO {
             ...data,
             last5Games: last5GamesFormatted
         } as GetProfileResponse;
+    }
+
+    async editMyProfile(userId: string, body: EditProfileRequest): Promise<EditProfileResponse> {
+        const updateData: any = {};
+        if (body.displayName !== undefined) updateData.display_name = body.displayName;
+        if (body.bio !== undefined) updateData.bio = body.bio;
+        if (body.profilePicture !== undefined) updateData.profile_url = body.profilePicture;
+
+        const { error: updateError } = await this.supabase.client.from('profiles')
+            .update(updateData)
+            .eq('id', userId);
+        
+        if (updateError) throw updateError;
+
+        // Return the full updated profile using our efficient view-based method
+        return await this.getMyProfile(userId);
     }
 }
