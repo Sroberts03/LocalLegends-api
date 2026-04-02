@@ -15,7 +15,7 @@ export class GameDAO {
         const { favIds, joinedIds } = await this.fetchUserContext(userId);
 
         // 2. Early return for "Favorites Only" if no favorites exist
-        if (filter.favoritesOnly && favIds.length === 0) {
+        if (filter.favoritesOnly === true && favIds.length === 0) {
             return [];
         }
 
@@ -76,24 +76,38 @@ export class GameDAO {
             query = query.not('id', 'in', `(${joinedIds.join(',')})`);
         }
 
-        if (favoritesOnly) {
+        if (favoritesOnly === true) {
             query = query.in('sport_id', favIds);
         }
 
+        // Helper to check if a value is effectively "empty" or the string "undefined"
+        const isDefined = 
+            (val: any) => val !== 
+            undefined && val !== null && String(val) !== 'undefined';
+
         // Optional request filters
-        if (filter.sportIds?.length) {
+        if (isDefined(filter.sportIds)) {
             const ids = Array.isArray(filter.sportIds) ? filter.sportIds : [filter.sportIds];
-            query = query.in('sport_id', ids);
+            const cleanIds = ids.filter(isDefined);
+            if (cleanIds.length > 0) {
+                query = query.in('sport_id', cleanIds);
+            }
         }
 
-        if (filter.skillLevels?.length) {
+        if (isDefined(filter.skillLevels)) {
             const levels = Array.isArray(filter.skillLevels) ? filter.skillLevels : [filter.skillLevels];
-            query = query.in('skill_level', levels);
+            const cleanLevels = levels.filter(isDefined);
+            if (cleanLevels.length > 0) {
+                query = query.in('skill_level', cleanLevels);
+            }
         }
 
-        if (filter.genderPreferences?.length) {
+        if (isDefined(filter.genderPreferences)) {
             const preferences = Array.isArray(filter.genderPreferences) ? filter.genderPreferences : [filter.genderPreferences];
-            query = query.in('gender_preference', preferences);
+            const cleanPreferences = preferences.filter(isDefined);
+            if (cleanPreferences.length > 0) {
+                query = query.in('gender_preference', cleanPreferences);
+            }
         }
 
         if (happeningTodayOnly) {
