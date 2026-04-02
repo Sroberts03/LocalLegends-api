@@ -81,33 +81,30 @@ export class GameDAO {
         }
 
         // Helper to check if a value is effectively "empty" or the string "undefined"
-        const isDefined = 
-            (val: any) => val !== 
-            undefined && val !== null && String(val) !== 'undefined';
+        const isDefined = (val: any) => 
+            val !== undefined && val !== null && String(val) !== 'undefined' && String(val).trim() !== '';
+
+        // Helper to ensure we have a clean array of values, even if they arrive as comma-separated strings
+        const ensureArray = (val: any): string[] => {
+            if (!isDefined(val)) return [];
+            if (Array.isArray(val)) return val.filter(isDefined);
+            return String(val).split(',').map(v => v.trim()).filter(isDefined);
+        };
 
         // Optional request filters
-        if (isDefined(filter.sportIds)) {
-            const ids = Array.isArray(filter.sportIds) ? filter.sportIds : [filter.sportIds];
-            const cleanIds = ids.filter(isDefined);
-            if (cleanIds.length > 0) {
-                query = query.in('sport_id', cleanIds);
-            }
+        const sportIds = ensureArray(filter.sportIds);
+        if (sportIds.length > 0) {
+            query = query.in('sport_id', sportIds);
         }
 
-        if (isDefined(filter.skillLevels)) {
-            const levels = Array.isArray(filter.skillLevels) ? filter.skillLevels : [filter.skillLevels];
-            const cleanLevels = levels.filter(isDefined);
-            if (cleanLevels.length > 0) {
-                query = query.in('skill_level', cleanLevels);
-            }
+        const skillLevels = ensureArray(filter.skillLevels);
+        if (skillLevels.length > 0) {
+            query = query.in('skill_level', skillLevels);
         }
 
-        if (isDefined(filter.genderPreferences)) {
-            const preferences = Array.isArray(filter.genderPreferences) ? filter.genderPreferences : [filter.genderPreferences];
-            const cleanPreferences = preferences.filter(isDefined);
-            if (cleanPreferences.length > 0) {
-                query = query.in('gender_preference', cleanPreferences);
-            }
+        const genderPreferences = ensureArray(filter.genderPreferences);
+        if (genderPreferences.length > 0) {
+            query = query.in('gender_preference', genderPreferences);
         }
 
         if (happeningTodayOnly) {
