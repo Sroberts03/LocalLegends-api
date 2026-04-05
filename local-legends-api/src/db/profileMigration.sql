@@ -11,6 +11,7 @@ create table if not exists public.profiles (
     bio text,
     status profile_status default 'Good Standing'::profile_status,
     reliability_score int default 0,
+    push_notification_token text,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
     updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

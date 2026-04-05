@@ -1,4 +1,4 @@
-import Game, { GameCreation, GameFilter, GameWithDetails } from "src/common/models/Game";
+import { GameCreation, GameFilter, GameWithDetails } from "src/common/models/Game";
 import Sport from "src/common/models/Sport";
 
 export interface GetGamesReq extends GameFilter { }
@@ -14,7 +14,7 @@ export interface GetSportsRes {
 export interface CreateGameReq extends GameCreation { }
 
 export interface CreateGameRes {
-    game: Game;
+    game: GameWithDetails;
 }
 
 export interface JoinGameReq {

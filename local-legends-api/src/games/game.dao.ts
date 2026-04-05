@@ -138,7 +138,7 @@ export class GameDAO {
         return data as Sport[];
     }
 
-    async createGame(req: CreateGameReq, userId: string): Promise<Game> {
+    async createGame(req: CreateGameReq, userId: string): Promise<GameWithDetails> {
         const { data: existingLocation, error: locationError } = 
             await this.supabase.client.from('locations')
             .select('id').eq('google_place_id', req.googlePlaceId)
@@ -183,7 +183,14 @@ export class GameDAO {
 
         await this.addUserToGame(userId, data.id);
 
-        return data as unknown as Game;
+        const { data: gameWithDetails, error: gameError } = await this.supabase.client
+            .from('games_with_details')
+            .select('*')
+            .eq('id', data.id)
+            .single();
+        if (gameError) throw gameError;
+
+        return gameWithDetails as unknown as GameWithDetails;
     }
 
     async createNewLocation(
